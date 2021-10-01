@@ -24,6 +24,7 @@ from hotword_precise_lite.mycroft_hotword import TFLiteHotWord
 
 And in the same file you must  modify the following class ...
 
+````
 class HotWordFactory:
     CLASSES = {
         "pocketsphinx": PocketsphinxHotWord,
@@ -32,7 +33,7 @@ class HotWordFactory:
         "snowboy": SnowboyHotWord,
         "porcupine": PorcupineHotWord
     }
-
+````
 
 You must also change the 'mycroft.conf' config
 file to use the plugin. If you copied the 
