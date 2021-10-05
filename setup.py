@@ -1,8 +1,26 @@
-from setuptools import setup, find_packages
+import os
+import sys
+from distutils.core import setup
+from distutils.command.install import install as _install
+from setuptools import find_packages
+from subprocess import call
 
 VERSION = '0.0.1'
 DESCRIPTION = 'Precise Runner for Mycroft'
 LONG_DESCRIPTION = 'Plugin module for Mycroft that supports Precise using tensorflow lite runtime'
+
+
+class install(_install):
+    def run(self):
+        _install.run(self)
+        self.execute(_post_install, (self.install_lib,),
+                     msg="Running post install task")
+
+
+def _post_install(dir):
+    call([sys.executable, '-m', 'pip', 'install', '--index-url',
+         'https://google-coral.github.io/py-repo/', 'tflite_runtime~=2.5.0'])
+
 
 def required(requirements_file):
     """Read requirements file and remove comments and empty lines."""
@@ -12,7 +30,9 @@ def required(requirements_file):
         return [pkg for pkg in requirements
                 if pkg.strip() and not pkg.startswith("#")]
 
+
 setup(
+    cmdclass={'install': install},
     name="hotword_precise_lite",
     version=VERSION,
     author="MycroftAi",
