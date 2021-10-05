@@ -1,0 +1,5 @@
+attrs~=21.2.0
+sonopy~=0.1.2
+# Get tflite_runtime direct from Google's repo. It is not available on PyPI.
+tflite_runtime~=2.5.0
+--extra-index-url=https://google-coral.github.io/py-repo/
