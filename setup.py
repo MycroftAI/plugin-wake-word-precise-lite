@@ -1,8 +1,7 @@
 import os
 import sys
-from distutils.core import setup
-from distutils.command.install import install as _install
-from setuptools import find_packages
+from setuptools import setup, find_packages
+from setuptools.command.install import install as _install
 from subprocess import call
 
 VERSION = '0.0.1'
