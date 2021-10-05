@@ -10,6 +10,7 @@ LONG_DESCRIPTION = 'Plugin module for Mycroft that supports Precise using tensor
 
 
 class install(_install):
+    """A custom install command class to execute post-install tasks."""
     def run(self):
         _install.run(self)
         self.execute(_post_install, (self.install_lib,),
@@ -17,6 +18,7 @@ class install(_install):
 
 
 def _post_install(dir):
+    """Will be executed after installing the package."""
     call([sys.executable, '-m', 'pip', 'install', '--index-url',
          'https://google-coral.github.io/py-repo/', 'tflite_runtime~=2.5.0'])
 
