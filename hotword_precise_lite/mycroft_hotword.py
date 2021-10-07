@@ -58,6 +58,11 @@ class TFLiteHotWord(TFLiteEngine):
         params['on_activation'] = on_activation
         params['on_prediction'] = self.on_prediction
 
+        # rough estimate 1 phoneme per 2 chars
+        self.num_phonemes = len(key_phrase) / 2 + 1
+        phoneme_duration = config.get('phoneme_duration', 120) / 1000
+        self.expected_duration = self.num_phonemes * phoneme_duration
+
         self.listener = Listener(params['local_model'], params['chunk_size'])
         self.engine = ListenerEngine(self.listener, params['chunk_size'])
         params['engine'] = self.engine

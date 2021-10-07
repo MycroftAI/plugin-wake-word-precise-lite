@@ -1,0 +1,4 @@
+attrs~=21.2.0
+sonopy~=0.1.2
+numpy
+# tflite_runner is installed via setup.py as it requires a custom index-url
