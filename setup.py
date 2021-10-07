@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 from setuptools.command.install import install as _install
 from subprocess import call
 
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 DESCRIPTION = 'Precise Runner for Mycroft'
 LONG_DESCRIPTION = 'Plugin module for Mycroft that supports Precise using tensorflow lite runtime'
 
