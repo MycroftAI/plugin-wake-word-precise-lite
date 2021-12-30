@@ -151,7 +151,7 @@ def inject_params(model_name: str) -> ListenerParams:
     """Set the global listener params to a saved model"""
     params_file = model_name + '.params'
     try:
-        with open(params_file) as f:
+        with open(params_file, 'r', encoding='utf-8') as f:
             pr.__dict__.update(compatibility_params, **json.load(f))
     except (OSError, ValueError, TypeError):
         if isfile(model_name):
@@ -161,5 +161,5 @@ def inject_params(model_name: str) -> ListenerParams:
 
 def save_params(model_name: str):
     """Save current global listener params to a file"""
-    with open(model_name + '.params', 'w') as f:
+    with open(model_name + '.params', 'w', encoding='utf-8') as f:
         json.dump(pr.__dict__, f)

@@ -8,7 +8,7 @@ VERSION = '0.0.2'
 DESCRIPTION = 'Precise Runner for Mycroft'
 LONG_DESCRIPTION = 'Plugin module for Mycroft that supports Precise using tensorflow lite runtime'
 
-with open('README.md', 'r') as fh:
+with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
 
@@ -30,7 +30,7 @@ def _post_install(dir):
 def required(requirements_file):
     """Read requirements file and remove comments and empty lines."""
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(base_dir, requirements_file), 'r') as f:
+    with open(os.path.join(base_dir, requirements_file), 'r', encoding='utf-8') as f:
         requirements = f.read().splitlines()
         return [pkg for pkg in requirements
                 if pkg.strip() and not pkg.startswith('#')]
