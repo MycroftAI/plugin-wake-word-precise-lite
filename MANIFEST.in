@@ -1,4 +1,4 @@
-LICENSE
-README.md
-requirements.txt
-hey_mycroft.tflite
+include LICENSE
+include README.md
+include requirements.txt
+include hey_mycroft.tflite
