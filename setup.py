@@ -1,67 +1,55 @@
-import os
-import sys
-from setuptools import setup, find_packages
-from setuptools.command.install import install as _install
-from subprocess import call
+#!/usr/bin/env python3
+from pathlib import Path
 
-VERSION = '0.0.2'
-DESCRIPTION = 'Precise Runner for Mycroft'
-LONG_DESCRIPTION = 'Plugin module for Mycroft that supports Precise using tensorflow lite runtime'
+import setuptools
+from setuptools import setup
 
-with open('README.md', 'r', encoding='utf-8') as fh:
-    long_description = fh.read()
+this_dir = Path(__file__).parent
+module_dir = this_dir / "hotword_precise_lite"
 
+# -----------------------------------------------------------------------------
 
-class install(_install):
-    """A custom install command class to execute post-install tasks."""
+# Load README in as long description
+long_description: str = ""
+readme_path = this_dir / "README.md"
+if readme_path.is_file():
+    long_description = readme_path.read_text(encoding="UTF-8")
 
-    def run(self):
-        _install.run(self)
-        self.execute(_post_install, (self.install_lib,),
-                     msg='Running post install task')
+requirements = []
+requirements_path = this_dir / "requirements.txt"
+if requirements_path.is_file():
+    with open(requirements_path, "r", encoding="utf-8") as requirements_file:
+        requirements = requirements_file.read().splitlines()
 
+version_path = module_dir / "VERSION"
+with open(version_path, "r", encoding="utf-8") as version_file:
+    version = version_file.read().strip()
 
-def _post_install(dir):
-    """Will be executed after installing the package."""
-    call([sys.executable, '-m', 'pip', 'install', '--index-url',
-         'https://google-coral.github.io/py-repo/', 'tflite_runtime~=2.5.0'])
+# -----------------------------------------------------------------------------
 
-
-def required(requirements_file):
-    """Read requirements file and remove comments and empty lines."""
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(base_dir, requirements_file), 'r', encoding='utf-8') as f:
-        requirements = f.read().splitlines()
-        return [pkg for pkg in requirements
-                if pkg.strip() and not pkg.startswith('#')]
-
+PLUGIN_ENTRY_POINT = "hotword_precise_lite = hotword_precise_lite:TFLiteHotWord"
 
 setup(
-    cmdclass={'install': install},
-    name='hotword_precise_lite',
-    version=VERSION,
-    author='Mycroft AI',
-    author_email='dev@mycroft.ai',
-    description=DESCRIPTION,
+    name="hotword_precise_lite",
+    version=version,
+    author="Mycroft AI",
+    author_email="dev@mycroft.ai",
+    description="Precise wake word runner for Mycroft using Tensorflow Lite",
     long_description=long_description,
-    long_description_content_type='text/markdown',
-    license=('Apache License 2.0'),
-    packages=find_packages(),
-    entry_points={
-        'mycroft.plugin.wake_word': 'hotword_precise_lite = hotword_precise_lite:TFLiteHotWord'},
-    keywords=['mycroft', 'wake word', 'hot word',
-              'precise', 'lite', 'tensorflow'],
+    long_description_content_type="text/markdown",
+    license="Apache-2.0",
+    packages=setuptools.find_packages(),
+    entry_points={"mycroft.plugin.wake_word": PLUGIN_ENTRY_POINT},
+    keywords=["mycroft", "wake word", "hot word", "precise", "lite", "tensorflow"],
     classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'Topic :: Multimedia :: Sound/Audio :: Speech',
-        'Topic :: Text Processing :: Linguistic',
-        'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 3',
-        'Operating System :: LINUX :: Linux',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: Microsoft :: Windows',
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Topic :: Multimedia :: Sound/Audio :: Speech",
+        "Topic :: Text Processing :: Linguistic",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
-    install_requires=required('requirements.txt')
+    install_requires=requirements,
 )

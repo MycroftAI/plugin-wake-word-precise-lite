@@ -17,15 +17,28 @@ These configure the following stages:
  - Conversion from audio to input vectors
  - Interpretation of the network output to a confidence value
 """
+import typing
+from dataclasses import dataclass
+from enum import IntEnum
 from math import floor
 
-import attr
-import json
-import hashlib
-from os.path import isfile
+
+class Vectorizer(IntEnum):
+    """
+    Chooses which function to call to vectorize audio
+
+    Options:
+        mels: Convert to a compressed Mel spectrogram
+        mfccs: Convert to a MFCC spectrogram
+        speechpy_mfccs: Legacy option to convert to MFCCs using old library
+    """
+
+    mels = 1
+    mfccs = 2
+    speechpy_mfccs = 3
 
 
-@attr.s(frozen=True)
+@dataclass
 class ListenerParams:
     """
     General pipeline information:
@@ -57,18 +70,19 @@ class ListenerParams:
      - threshold_config: Output distribution configuration automatically generated from precise-calc-threshold
      - threshold_center: Output distribution center automatically generated from precise-calc-threshold
     """
-    buffer_t = attr.ib()  # type: float
-    window_t = attr.ib()  # type: float
-    hop_t = attr.ib()  # type: float
-    sample_rate = attr.ib()  # type: int
-    sample_depth = attr.ib()  # type: int
-    n_fft = attr.ib()  # type: int
-    n_filt = attr.ib()  # type: int
-    n_mfcc = attr.ib()  # type: int
-    use_delta = attr.ib()  # type: bool
-    vectorizer = attr.ib()  # type: int
-    threshold_config = attr.ib()  # type: tuple
-    threshold_center = attr.ib()  # type: float
+
+    buffer_t: float = 1.5
+    window_t: float = 0.1
+    hop_t: float = 0.05
+    sample_rate: int = 16000
+    sample_depth: int = 2
+    n_fft: int = 512
+    n_filt: int = 20
+    n_mfcc: int = 13
+    use_delta: bool = False
+    vectorizer: int = Vectorizer.mfccs
+    threshold_config: typing.Tuple[typing.Tuple[int, ...], ...] = ((6, 4),)
+    threshold_center: float = 0.2
 
     @property
     def buffer_samples(self):
@@ -79,7 +93,9 @@ class ListenerParams:
     @property
     def n_features(self):
         """Number of timesteps in one input to the network"""
-        return 1 + int(floor((self.buffer_samples - self.window_samples) / self.hop_samples))
+        return 1 + int(
+            floor((self.buffer_samples - self.window_samples) / self.hop_samples)
+        )
 
     @property
     def window_samples(self):
@@ -102,64 +118,8 @@ class ListenerParams:
         num_features = {
             Vectorizer.mfccs: self.n_mfcc,
             Vectorizer.mels: self.n_filt,
-            Vectorizer.speechpy_mfccs: self.n_mfcc
+            Vectorizer.speechpy_mfccs: self.n_mfcc,
         }[self.vectorizer]
         if self.use_delta:
             num_features *= 2
         return num_features
-
-    def vectorization_md5_hash(self):
-        """Hash all the fields related to audio vectorization"""
-        keys = sorted(pr.__dict__)
-        keys.remove('threshold_config')
-        keys.remove('threshold_center')
-        return hashlib.md5(
-            str([pr.__dict__[i] for i in keys]).encode()
-        ).hexdigest()
-
-
-class Vectorizer:
-    """
-    Chooses which function to call to vectorize audio
-
-    Options:
-        mels: Convert to a compressed Mel spectrogram
-        mfccs: Convert to a MFCC spectrogram
-        speechpy_mfccs: Legacy option to convert to MFCCs using old library
-    """
-    mels = 1
-    mfccs = 2
-    speechpy_mfccs = 3
-
-
-# Global listener parameters
-# These are the default values for all parameters
-# These were selected tentatively to balance CPU usage with accuracy
-# For the Hey Mycroft wake word, small changes to these parameters
-# did not make a significant difference in accuracy
-pr = ListenerParams(
-    buffer_t=1.5, window_t=0.1, hop_t=0.05, sample_rate=16000,
-    sample_depth=2, n_fft=512, n_filt=20, n_mfcc=13, use_delta=False,
-    threshold_config=((6, 4),), threshold_center=0.2, vectorizer=Vectorizer.mfccs
-)
-
-# Used to fill in old param files without new attributes
-compatibility_params = dict(vectorizer=Vectorizer.speechpy_mfccs)
-
-
-def inject_params(model_name: str) -> ListenerParams:
-    """Set the global listener params to a saved model"""
-    params_file = model_name + '.params'
-    try:
-        with open(params_file, 'r', encoding='utf-8') as f:
-            pr.__dict__.update(compatibility_params, **json.load(f))
-    except (OSError, ValueError, TypeError):
-        if isfile(model_name):
-            print('Warning: Failed to load parameters from ' + params_file)
-    return pr
-
-
-def save_params(model_name: str):
-    """Save current global listener params to a file"""
-    with open(model_name + '.params', 'w', encoding='utf-8') as f:
-        json.dump(pr.__dict__, f)
