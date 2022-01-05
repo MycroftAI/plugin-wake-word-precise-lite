@@ -23,7 +23,7 @@ from .params import ListenerParams
 from .util import buffer_to_audio
 
 try:
-    from mycroft.speech.hotword_factory import HotWordEngine
+    from mycroft.client.speech.hotword_factory import HotWordEngine
     from mycroft.util.log import LOG
 except ImportError:
 
@@ -33,7 +33,7 @@ except ImportError:
         def __init__(self, key_phrase="hey mycroft", config=None, lang="en-us"):
             self.config = config or {}
 
-        def found_wake_word(self, frame_data):
+        def found_wake_word(self, frame_data) -> bool:
             """frame_data is unused"""
             return False
 
@@ -42,6 +42,11 @@ except ImportError:
 
     HotWordEngine = BaseHotWordEngine
     LOG = logging.getLogger(__name__)
+
+#  ----------------------------------------------------------------------------
+
+_DIR = Path(__file__).parent
+_DEFAULT_MODEL = _DIR / "models" / "hey_mycroft.tflite"
 
 #  ----------------------------------------------------------------------------
 
@@ -63,8 +68,9 @@ class TFLiteHotWordEngine(HotWordEngine):
         self.trigger_level = self.config.get("trigger_level", trigger_level)
         self.chunk_size = self.config.get("chunk_size", chunk_size)
 
-        local_model_file = self.config.get("local_model_file", local_model_file)
-        assert local_model_file, "local_model_file is required"
+        local_model_file = (
+            self.config.get("local_model_file", local_model_file) or _DEFAULT_MODEL
+        )
 
         self.model_path = Path(local_model_file).absolute()
 
@@ -189,7 +195,7 @@ class TFLiteHotWordEngine(HotWordEngine):
             self._is_found = True
             LOG.debug("Triggered")
 
-    def found_wake_word(self, frame_data):
+    def found_wake_word(self, frame_data) -> bool:
         if self._is_found:
             self._is_found = False
             return True

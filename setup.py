@@ -27,7 +27,7 @@ with open(version_path, "r", encoding="utf-8") as version_file:
 
 # -----------------------------------------------------------------------------
 
-PLUGIN_ENTRY_POINT = "hotword_precise_lite = hotword_precise_lite:TFLiteHotWord"
+PLUGIN_ENTRY_POINT = "hotword_precise_lite = hotword_precise_lite:TFLiteHotWordEngine"
 
 setup(
     name="hotword_precise_lite",
@@ -39,6 +39,9 @@ setup(
     long_description_content_type="text/markdown",
     license="Apache-2.0",
     packages=setuptools.find_packages(),
+    package_data={
+        "hotword_precise_lite": ["models/hey_mycroft.tflite", "VERSION", "py.typed"]
+    },
     entry_points={"mycroft.plugin.wake_word": PLUGIN_ENTRY_POINT},
     keywords=["mycroft", "wake word", "hot word", "precise", "lite", "tensorflow"],
     classifiers=[
