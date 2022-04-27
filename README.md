@@ -8,7 +8,7 @@ This module provides a Mycroft plugin module for the hotword_factory which suppo
 This module must be pip installed into the Mycroft virtual environment before use. 
 
 ```
-mycroft-pip install https://github.com/MycroftAI/plugin-wake-word-precise
+mycroft-pip install https://github.com/MycroftAI/plugin-wake-word-precise-lite
 ```
 
 Then change your Mycroft Configuration to use the installed module:
